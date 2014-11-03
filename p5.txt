@@ -51,13 +51,13 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
 6. A continuación, hay más de una docena de tramas TCP/HTTP.
  ** ¿Podrías decir la URL que se está pidiendo?
-    
+    http://ekiga.net/ip/
  ** ¿Qué user agent (UA) la está pidiendo?
-    
+    Ekiga
  ** ¿Qué devuelve el servidor?
-    
+    83.36.48.212 (ip pública desde la máquina que se hizo la captura)
  ** Si lanzamos el navegador web, por ejemplo, Mozilla Firefox, y vamos a la misma URL, ¿qué recibimos? ¿Qué es, entonces, lo que está respondiendo el servidor?
-    
+    Recibimos una página de texto en la que aparece escrita la IP: 193.147.49.121. Dicha IP pertenece a la IP pública de mi máquina. 
 
 
 7. Hasta la trama 45 se puede observar una secuencia de tramas del protocolo STUN.
