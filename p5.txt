@@ -92,16 +92,23 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
 10. Una vez registrados, podemos efectuar una llamada. Vamos a probar con el servicio de eco de Ekiga que nos permite comprobar si nos hemos conectado correctamente. El servicio de eco tiene la dirección sip:500@ekiga.net. Veamos el INVITE de cerca.
  ** ¿Puede verse el nombre del que efectúa la llamada, así como su dirección SIP?
+    Sí, "Gregorio Robles" y "sip:grex@ekiga.net>"
  ** ¿Qué es lo que contiene el cuerpo de la trama? ¿En qué formato/protocolo está?
+    Información sobre los media: audio y video. Protocolo: RTP
  ** ¿Tiene éxito el primer intento? ¿Cómo lo sabes?
+    No, porque le responde con un mensaje SIP: "Status: 407 Proxy Authentication Required"
  ** ¿En qué se diferencia el segundo INVITE más abajo del primero? ¿A qué crees que se debe esto?
-
+    En el segundo ya aparece en la cabecera SIP "Proxy-Authorization". Es necesario para una correcta autenticacion de la persona registrada que solitica la llamada
 
 11. Una vez conectado, estudia el intercambio de tramas.
  ** ¿Qué protocolo(s) se utiliza(n)? ¿Para qué sirven estos protocolos?
+    RTP (para transporte de tráfico multimedia en Internet) usando el estándar para la transmisión de   vídeo: H.261, y RTCP (intercambiar periódicamente las estadísticas observadas para cada origen)
  ** ¿Cuál es el tamaño de paquete de los mismos?
+    214 bytes los RTP, y 43 bytes los RTCP
  ** ¿Se utilizan bits de padding?
+    No
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
+    Alrededor de 0,01 seg
  ** ¿Cuántos bits/segundo estamos enviando?
 
 
