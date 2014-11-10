@@ -110,9 +110,10 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Se utilizan bits de padding?
         No
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
-        Alrededor de 0,01 seg
+        paquetes RTP: 20 ms aproximadamente
+        paquetes RTCP: 2 seg
  ** ¿Cuántos bits/segundo estamos enviando?
-
+        64 kbps
 
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
@@ -126,8 +127,8 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Cuál es el valor máximo del delta? ¿Y qué es lo que significa el valor de delta?
         Es el tiempo que transcurre desde la recepción del paquete anterior. 1290,48 ms para un flujo (vídeo), y 1290,44 ms para el otro (audio).
  ** ¿Cuáles son los valores de jitter (medio y máximo)? ¿Qué quiere decir eso? ¿Estamos ante una conversación de calidad?
-        El jitter es el intervalo de la variación de retardo para cada paquete, especificando el máximo y el valor medio. Máximos: 119,64 ms (audio) y 183,10 ms (vídeo); y medios: 42,50 ms (audio) y 153,24 ms (vídeo).
-        No creo que sea de calidad porque varía mucho el valor del jitter, no es estable el retardo con el que llegan los paquetes respecto al anterior
+        El jitter es el intervalo de la variación de retardo para cada paquete, especificando el máximo y el valor medio. Tiene que ver con el buffer. Máximos: 119,64 ms (audio) y 183,10 ms (vídeo); y medios: 42,50 ms (audio) y 153,24 ms (vídeo).
+        No creo que sea de calidad porque varía mucho el valor del retardo con el que llegan los paquetes respecto al anterior. Observando "IO Graph" tenemos muchas subidas y bajadas, lo ideal sería que fuese prácticamente recto, ya que significaría que está enviado casi lo mismo en el mismo intervalo de tiempo
 
 
 13. Elige un paquete RTP de audio. Analiza el flujo de audio en Telephony -> RTP -> Stream Analysis.
@@ -147,10 +148,12 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
 14. En Telephony selecciona el menú VoIP calls. Verás que se lista la llamada de voz IP capturada en una ventana emergente. Selecciona esa llamada y pulsa el botón Graph.
  ** ¿Cuánto dura la conversación?
-        20,949 seg la de vídeo y 20,889 seg la de audio
+        Todo el proceso: 39.230 seg; y 20,949 seg la de vídeo y 20,889 seg la de audio
  ** ¿Cuáles son sus SSRC? ¿Por qué hay varios SSRCs? ¿Hay CSRCs?
-        SSRC de vídeo: 0x433306582
-        SSRC de audio: 0xBF4AFD37
+        Los SSRCs identifican de manera única, dentro de una sesión RTP, la fuente que emite. Por lo tanto tenemos dos:
+            SSRC de vídeo: 0x433306582
+            SSRC de audio: 0xBF4AFD37
+        No hay CSRCs porque es el identificador de las fuentes contributivas para una combinación de paquetes RTP, pero en este caso el flujo de audio y vídeo van por separado, y no hay CSRCs
     
     
 15. Identifica la trama donde se finaliza la conversación.
@@ -159,7 +162,7 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿En qué trama(s)?
         924, 925, 927, 933
  ** ¿Por qué crees que se envía varias veces?
-        4 veces por si acaso hay pérdidas, ya que utiliza UDP
+        4 veces por si acaso hay pérdidas, ya que utiliza UDP. De esta manera no tiene que estar esperando a que lleguen los ACKs para enviarlo de nuevo si no había llegado el primero; contamos con que uno de los cuatro llegará
 
 
 16. Finalmente, se cierra la aplicación de VozIP.
@@ -183,17 +186,31 @@ Captura una sesión SIP de una conversación con el número SIP sip:9999@qxip.ne
 
 17. Observa las diferencias en el inicio de la conversación entre el entorno del laboratorio y el del ejercicio anterior:
  ** ¿Es necesario el uso de DNS y STUN? ¿Por qué?
+        El DNS es necesario para conocer la dirección perteneciente al dominio de nombre "Ekiga"
+        Es necesario STUN para saber qué tipo de router NAT tenemos ya que estamos tras un NAT porque nuestra IP pública no es la IP de enlace. Como quiere contactar con una IP exterior (la de Ekiga) necesita saber qué tipo de router NAT tiene, para ver qué paquetes acepta y no
  ** ¿Son diferentes el registro y la descripción de la sesión?
-
+        Sí, primero aparecen paquetes "SIP REGISTER" para registrar la dirección, y después un paquete "SIP/SDP INVITE with session description" en el que a la vez que invita a una determinada dirección a una llamada, describe los parámetros de la sesión con SDP
+        
 
 18. Identifica las diferencias existentes entre esta conversación y la conversación anterior:
  ** ¿Cuántos flujos tenemos?
+        Un solo flujo que contiene audio para cada uno de los sentidos de la llamada. Es decir de la IP 188.226.157.55 a la 193.147.49.113 hay un flujo RTP con datos de audio, y viceversa hay otro 
  ** ¿Cuál es su periodicidad?
+        paquetes RTP: 20 ms
+        paquetes RTCP: 5 seg
+         
+        
  ** ¿Cuánto es el valor máximo del delta y los valores medios y máximo del jitter?
+        Nos fijamos en el sentido: 193.147.49.113 (mi máquina, quién inicia la llamada) a 188.226.157.55 (IP de sip:9999@qxip.net)
+            Máximo valor del delta: 37.23 ms
+            Máximo valor del jitter: 2.24 ms
+            Media del valor del jitter: 0.39 ms
  ** ¿Podrías reproducir la conversación desde Wireshark? ¿Cómo? Comprueba que poniendo un valor demasiado pequeño para el buffer de jitter, la conversación puede no tener la calidad necesaria.
+        Sí, en el menú: Telephony + VoIP Calls + Player
+        Si reducimos el valor del jitter, se escucha entre cortado, disminuye la calidad porque no tiene capacidad para guardar todos los paquetes necesarios en el buffer
  ** ¿Sabrías decir qué tipo de servicio ofrece sip:9999@qxip.net?
-
-
+        Es un servicio de audio. Te devuelve paquetes de audio, suena una canción
+        
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
 
